@@ -1,6 +1,6 @@
 <div align=center>
 
-# Git/Github e Linux
+# Sprint 1 - Git/Github e Linux
 
 **O GitHb é uma plataforma de hospedagem de código, que permite aos desenvolvedores armazenar e gerenciar projetos de software. É considerado uma ferramenta essencial tanto em projetos pequenos quanto grandes, pois existem recursos de controle de versões de código e colaboração entre a equipe de desenvolvedores que estejam trablhando no mesmo projeto. O Git também é amplamente usado no mercado por oferecer a possibilidade de criar repositórios privados gratuitamente, guardando códigos de forma segura e protegendo informações sensíveis do projeto.**
 
