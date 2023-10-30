@@ -2,9 +2,8 @@
 
 ## Apresentação!
 
-Oi, meu nome é ***Wiliane Vitória.***
-Moro em ***Recife, Pernambuco, e estudo na UNINASSAU, unidade Caxangá***, no curso de **Análise e Desenvolvimento de Sistemas.**
-
+Oi, meu nome é ***Wiliane Vitória.*** <br>
+Moro em ***Recife, Pernambuco, e estudo na UNINASSAU, unidade Caxangá***, no curso de **Análise e Desenvolvimento de Sistemas.** <br>
 Atualmente estou cursando o **segundo período do curso.**
 
 #
