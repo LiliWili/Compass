@@ -1,0 +1,141 @@
+Apresente o ator/atriz com maior número de filmes e a respectiva quantidade. A quantidade de filmes encontra-se na coluna Number of Movies do arquivo.
+
+Código:
+
+numero_filmes = {'ator/atriz': None, 'quantidade': 0}
+
+def conver_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+    
+caminho_arquivo = 'Desafio/atores.csv'
+
+with open('Desafio/actors.csv', 'r') as arquivo:
+    next(arquivo)
+    for linha in arquivo:
+        campos = linha.strip().split(',')
+        ator_ou_atriz = campos[0]
+
+        quantidade_filmes = float(campos[2]) if conver_float(campos[1]) else float(campos[3])
+
+        if quantidade_filmes > numero_filmes['quantidade']:
+            numero_filmes['ator/atriz'] = ator_ou_atriz
+            numero_filmes['quantidade'] = quantidade_filmes
+
+with open('etapa-1.txt', 'w') as saida:
+ saida=(f"O ator com o maior número de filmes é {numero_filmes['ator/atriz']} com {numero_filmes['quantidade']} filmes.")
+
+
+
+
+Apresente a média de receita de bilheteria bruta dos principais filmes, considerando todos os atores. Estamos falando aqui da média da coluna Gross.
+
+Código:
+
+total_bruta = 0.0
+total_filmes = 0
+
+with open('Desafio/actors.csv', 'r') as arquivo:
+    linhas = arquivo.readlines()[1:]
+
+    for linha in linhas:
+        campos = linha.strip().split(',')
+
+        receita_bruta = float(campos[5]) if campos[5].replace('.', '').isdigit() else float(campos[6])
+        total_bruta += receita_bruta
+        total_filmes += 1
+
+media_receita_bruta = total_bruta / total_filmes
+with open('etapa-2.txt', 'w') as saida:
+ saida=(f"A média de receita bruta dos principais filmes é de ${media_receita_bruta:.2f} milhões de dólares.")
+
+
+
+
+Apresente o ator/atriz com a maior média de receita de bilheteria bruta por filme do conjunto de dados. Considere a coluna Avarage per Movie para fins de cálculo.
+
+Código:
+
+maior_media = {
+    'ator/atriz': None,
+    'media_receita': 0.0
+}
+
+with open('Desafio/actors.csv', 'r') as arquivo:
+    linhas = arquivo.readlines()[1:]
+
+    for linha in linhas:
+        campos = linha.strip().split(',')
+        ator = campos[0]
+        media = float(campos[3])  
+
+        if media > maior_media['media_receita']:
+            maior_media['ator'] = ator
+            maior_media['media'] = media
+with open('etapa-3.txt', 'w') as saida:
+ saida=(f"O ator com a maior média_receita de bilheteria bruta por filme é {maior_media['ator']} com uma média de ${maior_media['media']:.2f} milhões de dólares")
+
+
+
+
+A coluna #1 Movie contém o filme de maior bilheteria em que o ator atuou. Realize a contagem de aparições destes filmes no dataset, listando-os ordenados pela quantidade de vezes em que estão presentes. Considere a ordem decrescente e, em segundo nível, o nome do  filme.
+
+Código:
+
+contagem_filmes = {}
+
+with open('Desafio/actors.csv', 'r') as arquivo:
+    linhas = arquivo.readlines()[1:]
+
+    for linha in linhas:
+        campos = linha.strip().split(',')
+        filme = campos[4]
+
+        if filme in contagem_filmes:
+            contagem_filmes[filme] += 1
+        else:
+            contagem_filmes[filme] = 1
+
+contagem_filmes_ordenada = dict(sorted(contagem_filmes.items(), key=lambda x: (-x[1], x[0])))
+
+for i, (filme, quantidade) in enumerate(contagem_filmes_ordenada.items(), start=1):
+    print(f"{i} - O filme '{filme}' aparece {quantidade} vez(es) no conjunto de dados.")
+
+with open('etapa-4.txt', 'w') as saida:
+ saida=(f"{i} - O filme '{filme}' aparece {quantidade} vez(es) no dataset.")
+
+
+
+
+
+Apresente a lista dos atores ordenada pela receita bruta de bilheteria de seus filmes (coluna Total Gross), em ordem decrescente.
+
+Código:
+
+ atores_e_receitas = []
+
+with open('Desafio/actors.csv', 'r') as arquivo:
+    linhas = arquivo.readlines()[1:]
+
+    for linha in linhas:
+        values = linha.split(',')
+        ator = values[0]
+        receita_bruta = values[1]
+
+        try:
+            receita_bruta = float(receita_bruta)
+        except ValueError:
+            continue
+
+        atores_e_receitas.append((ator, receita_bruta))
+
+atoreceitas_ordenados = sorted(atores_e_receitas, key=lambda x: x[1], reverse=True)
+
+for ator, receita in atoreceitas_ordenados:
+        print(f"{ator} - ${receita:.2f} milhões\n")
+
+with open('etapa-5.txt', 'w') as saida:
+     saida=(f"{ator} - ${receita:.2f} milhões\n")
