@@ -1,0 +1,186 @@
+E1- Você está recebendo um arquivo contendo 10.000 números inteiros, um em cada linha. Utilizando lambdas e high order functions, apresente os 5 maiores valores pares e a soma destes.
+Você deverá aplicar as seguintes funções no exercício:
+
+map, filter, sorted e sum
+
+Seu código deverá exibir na saída (simplesmente utilizando 2 comandos `print()`):
+
+a lista dos 5 maiores números pares em ordem decrescente;
+a soma destes valores.
+
+Código:
+
+with open('number.txt') as arquivo:
+    numero = list(map(int, arquivo.readlines()))
+    
+num_par = list(filter (lambda i: i % 2 == 0, numero))
+pares_order = sorted(num_par, reverse = True)
+_5numeros = pares_order[:5]
+soma_5_num = sum(_5numeros)
+print(_5numeros)
+print(soma_5_num)
+
+
+
+E2- Utilizando high order functions, implemente o corpo da função conta_vogais. O parâmetro de entrada será uma string e o resultado deverá ser a contagem de vogais presentes em seu conteúdo.
+
+É obrigatório aplicar as seguintes funções:
+len, filter e lambda
+
+Desconsidere os caracteres acentuados. Eles não serão utilizados nos testes do seu código.
+
+Código:
+
+def conta_vogais(texto:str)-> int:
+    vogais = "aeiou"
+    filtrada = filter(lambda x: x.lower() in vogais, texto)
+    conta_vogais=len(list(filter(lambda x: x.isalpha(), filtrada)))
+    return conta_vogais
+
+
+
+E3- A função calcula_saldo recebe uma lista de tuplas, correspondendo a um conjunto de lançamentos bancários. Cada lançamento é composto pelo seu valor (sempre positivo) e pelo seu tipo (C - crédito ou D - débito). 
+A partir dos lançamentos, a função deve calcular o valor final, somando créditos e subtraindo débitos. Na lista anterior, por exemplo, teríamos como resultado final 200.
+
+Além de utilizar lambdas, você deverá aplicar, obrigatoriamente, as seguintes funções na resolução:
+
+reduce (módulo functools) e map
+
+Código:
+
+from functools import reduce
+
+def calcula_saldo(lancamentos):
+    saldo_inicial = 0.0
+
+    credito = lambda x: x[0] if x[1] == 'C' else 0
+    debito = lambda x: x[0] if x[1] == 'D' else 0
+
+    valores_creditos = map(credito, lancamentos)
+    valores_debitos = map(debito, lancamentos)
+
+    saldo_final = saldo_inicial + reduce(lambda i, y: i + y, valores_creditos, 0) - reduce(lambda i, y: i + y, valores_debitos, 0)
+
+    return saldo_final
+
+lançamentos = [(200, 'D'), (300, 'D'), (100, 'C')]
+resultado = calcula_saldo(lançamentos)
+print(resultado)
+
+
+
+E4- A função calcular_valor_maximo deve receber dois parâmetros, chamados de operadores e operandos. Em operadores, espera-se uma lista de caracteres que representam as operações matemáticas suportadas (+, -, /, *, %), as quais devem ser aplicadas à lista de operadores nas respectivas posições. Após aplicar cada operação ao respectivo par de operandos, a função deverá retornar o maior valor dentre eles.
+Na resolução da atividade você deverá aplicar as seguintes funções:
+
+max, zip e map
+
+Código:
+
+def calcular_valor_maximo(operadores, operandos):
+    expressao = list(map(lambda op, num: f"{op}{num}" if isinstance(num, (int, float)) else str(num), operadores, operandos))
+    valores = []
+    for operador, operando in zip(operadores, operandos):
+        if operador == '%':
+            valor = operando[0] / 100 * operando[1]
+        elif operador == '/':
+            valor = operando[0] / operando[1]
+        else:
+            valor = eval(f"{operando[0]} {operador} {operando[1]}")
+        valores.append(valor)
+    return max(valores)
+
+operadores = ['+','-','*','/','%']
+operandos  = [(3,6), (-7,4.9), (8,-8), (10,2), (8,4)]
+
+resultado = calcular_valor_maximo(operadores, operandos)
+print(resultado)
+
+
+
+E5- Um determinado sistema escolar exporta a grade de notas dos estudantes em formato CSV. Cada linha do arquivo corresponde ao nome do estudante, acompanhado de 5 notas de avaliação, no intervalo [0-10]. É o arquivo estudantes.csv de seu exercício.
+Precisamos processar seu conteúdo, de modo a gerar como saída um relatório em formato textual contendo as seguintes informações:
+
+Nome do estudante, três maiores notas, em ordem decrescente, média das três maiores notas, com duas casas decimais de precisão
+
+O resultado do processamento deve ser escrito na saída padrão (print), ordenado pelo nome do estudante e obedecendo ao formato descrito a seguir:
+Nome: <nome estudante> Notas: [n1, n2, n3] Média: <média>
+
+Em seu desenvolvimento você deverá utilizar lambdas e as seguintes funções:
+
+round, map e sorted
+
+Código:
+
+import csv
+
+def processar_notas(estudante):
+    nome, *notas = estudante
+    notas = list(map(int, notas))
+    top_notas = sorted(notas, reverse=True)[:3]
+    media = round(sum(top_notas) / len(top_notas), 2)
+    return f"Nome: {nome} Notas: {top_notas} Média: {media}"
+
+with open('estudantes.csv', newline='') as csvfile:
+    reader = csv.reader(csvfile)
+    for linha in sorted(reader):
+        print(processar_notas(linha))
+
+
+
+E6- Você foi encarregado de desenvolver uma nova feature  para um sistema de gestão de supermercados. O analista responsável descreveu o requisito funcional da seguinte forma:
+
+- Para realizar um cálculo de custo, o sistema deverá permitir filtrar um determinado conjunto de produtos, de modo que apenas aqueles cujo valor unitário for superior à média deverão estar presentes no resultado. Vejamos o exemplo:
+
+Conjunto de produtos (entrada):
+
+Arroz: 4.99
+Feijão: 3.49
+Macarrão: 2.99
+Leite: 3.29
+Pão: 1.99
+
+Produtos com valor acima da média:
+
+Arroz: 4.99
+Feijão: 3.49
+
+Observe que estamos definindo a assinatura de uma função como parte de sua resposta. Você não pode mudá-la, apenas codificar seu corpo. O parâmetro conteudo é um dicionário cuja chave contém o nome do produto e o valor, o respectivo preço (ponto flutuante).
+
+O retorno da função obrigatoriamente deve ser uma lista. Cada elemento da lista é uma tupla em que a primeira posição contém o nome do produto e a segunda, o respectivo preço. Veja um exemplo de retorno:
+
+[
+ 
+('feijão', 3.49),
+ 
+ ('arroz', 4.99)
+ 
+]
+
+Importante: O retorno da função deve estar ordenado pelo preço do item (ordem crescente).
+
+Código:
+
+def maiores_que_media(conteudo: dict) -> list:
+    media = sum(conteudo.values()) / len(conteudo)
+    produtos_acima_media = [(produto, preco) for produto, preco in conteudo.items() if preco > media]
+    produtos_acima_media_sorted = sorted(produtos_acima_media, key=lambda x: x[1])
+    return produtos_acima_media_sorted
+    
+conteudo = {"arroz": 4.99,"feijão": 3.49,"macarrão": 2.99,"leite": 3.29,"pão": 1.99}
+
+
+
+E7- Generators são poderosos recursos da linguagem Python. Neste exercício, você deverá criar o corpo de uma função, cuja assinatura já consta em seu arquivo de início (def pares_ate(n:int):) .
+O objetivo da função pares_ate é retornar um generator para os valores pares no intervalo [2,n] . Observe que n representa o valor do parâmetro informado na chamada da função.
+
+Código:
+
+def pares_ate(n: int):
+   return(i for i in range(2, n + 1, 2))
+
+n = 10
+gerador = pares_ate(n)
+
+for valor in gerador:
+    print(valor)
+
