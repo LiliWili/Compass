@@ -1,0 +1,32 @@
+import pandas as panda
+
+dados = panda.read_csv("./actors.csv")
+mais_filmes = dados.loc[dados['Number of Movies'].idxmax()]
+total_filmes = dados['Number of Movies'].max()
+print(f'Ator com maior número de filmes - {mais_filmes["Actor"]} com {total_filmes} filmes.')
+
+import pandas as panda
+import numpy
+
+dados = panda.read_csv("./actors.csv")
+media = numpy.mean(dados["Number of Movies"])
+print(f"A média é {media}.")
+
+
+import pandas as panda
+import numpy
+
+dados = panda.read_csv("./actors.csv")
+media = dados.groupby('Actor')['Average per Movie'].mean().max()
+ator = dados.loc[dados['Average per Movie'].idxmax()]
+print (f'o ator com maior media é {ator["Actor"]} com {media}')
+
+
+
+import pandas as panda
+import numpy
+
+dados = panda.read_csv("./actors.csv")
+filme_mais_frequente = dados['#1 Movie'].value_counts().idxmax() 
+frequencia = dados['#1 Movie'].value_counts().max()
+print(f'O filme mais frequente é {filme_mais_frequente} com uma frequência de {frequencia} vezes')
