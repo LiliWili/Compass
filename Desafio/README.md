@@ -8,7 +8,7 @@
 **Etapa-1**
 **Tive algumas dificuldades para fazer o upload dos arquivos csv para o bucket mas fui atrás de ajuda dos colegas da squad e consegui resolver, o problema era em algumas pequenas partes do código e uma condição que tinha declarado incorretamente. Após fazer essas correções os arquivos foram enviados corretamente para o bucket**
 
-[Etapa I](Desafio\Etapa-1)
+[Etapa I]([Desafio\Etapa-1](https://github.com/LiliWili/Compass/tree/bbf34594642236e91950acbed6ba0796c4f8018f/Desafio/Etapa-1))
 
 #
 
