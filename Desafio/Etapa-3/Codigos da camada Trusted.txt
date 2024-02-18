@@ -1,0 +1,121 @@
+Codigo para o CSV
+
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import col
+from awsglue.dynamicframe import DynamicFrame
+
+args = getResolvedOptions(sys.argv, ['JOB_NAME', 'S3_INPUT_PATH', 'S3_TARGET_PATH'])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+source_file = args['S3_INPUT_PATH']
+target_path = args['S3_TARGET_PATH']
+
+df = glueContext.create_dynamic_frame.from_options(
+    "s3",
+    {
+      "paths": [
+        source_file
+      ]
+    },
+    "csv",
+    {"withHeader": True, "separator": "|"},
+    )
+
+df = df.select_fields(['id', 'tituloPincipal', 'tituloOriginal', 'genero', 'generoArtista', 'personagem', 'nomeArtista', 'profissao'])
+
+df = Filter.apply(frame=df, f=lambda x: x["genero"] == "Fantasy")
+
+df.toDF().show()
+
+dynamic_frame = DynamicFrame.fromDF(df.toDF(), glueContext, "dynamic_frame")
+
+glueContext.write_dynamic_frame.from_options(
+    frame=dynamic_frame,
+    connection_type="s3",
+    connection_options={"path": target_path},
+    format="parquet"
+)
+
+job.commit()
+
+
+
+
+
+
+
+
+
+
+
+
+Codigo para os JSON
+
+
+
+import sys
+import boto3
+from awsglue.utils import getResolvedOptions
+from awsglue.transforms import *
+from awsglue.dynamicframe import DynamicFrame
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import explode, col
+
+args = getResolvedOptions(sys.argv, ['JOB_NAME', 'S3_INPUT_PATH', 'S3_TARGET_PATH'])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+s3 = boto3.client('s3')
+
+source_bucket = args['S3_INPUT_PATH'].split('/')[2]
+source_prefix = '/'.join(args['S3_INPUT_PATH'].split('/')[3:])
+target_path = args['S3_TARGET_PATH']
+
+response = s3.list_objects_v2(Bucket=source_bucket, Prefix=source_prefix)
+files = [obj['Key'] for obj in response['Contents']]
+
+for file in files:
+
+    source_file = f"s3://{source_bucket}/{file}"
+
+    df = spark.read.option("multiline", "true").json(source_file)
+
+    filtered_df = df.select(
+        col("id").alias("film_id"),
+        explode("cast").alias("cast"),
+    ).select(
+        "film_id",
+        "cast.id",
+        "cast.gender",
+        "cast.known_for_department",
+        "cast.name",
+        "cast.original_name",
+        "cast.popularity",
+        "cast.cast_id",
+        "cast.character"
+    )
+
+    dynamic_frame = DynamicFrame.fromDF(filtered_df, glueContext, "dynamic_frame")
+    file_name = file.split('/')[-1].split('.')[0]
+    output_path = f"{target_path}/{file_name}"
+
+    glueContext.write_dynamic_frame.from_options(
+        frame=dynamic_frame,
+        connection_type="s3",
+        connection_options={"path": output_path},
+        format="parquet"
+    )
+
+job.commit()

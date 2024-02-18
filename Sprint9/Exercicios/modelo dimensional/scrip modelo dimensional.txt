@@ -1,0 +1,96 @@
+CREATE VIEW concessionaria.dim_cliente AS
+
+SELECT DISTINCT
+
+    idCliente AS CodigoCliente,
+
+    nomeCliente AS Cliente,
+
+    cidadeCliente AS Cidade,
+
+    estadoCliente AS EstadoCliente,
+
+    paisCliente AS Pais
+
+FROM concessionaria.cliente;
+
+
+
+CREATE VIEW concessionaria.dim_vendedor AS
+
+SELECT DISTINCT
+
+    idVendedor AS CodigoVendedor,
+
+    nomeVendedor AS Vendedor,
+
+    sexoVendedor AS Sexo,
+
+    estadoVendedor AS EstadoV
+
+FROM concessionaria.vendedor;
+
+
+
+CREATE VIEW concessionaria.dim_carro AS
+
+SELECT
+
+    idCarro AS CodigoCarro,
+
+    idCombustivel AS CodigoCombustivel,
+
+    modeloCarro AS Modelo,
+
+    kmCarro AS Km,
+
+    chassiCarro AS Chassi,
+
+    anoCarro AS Ano,
+
+    marcaCarro AS Marca
+
+FROM concessionaria.Carro;
+
+
+
+CREATE VIEW concessionaria.dim_combustivel AS
+
+SELECT DISTINCT
+
+    idCombustivel AS CodigoCombustivel,
+
+    tipoCombustivel AS Tipo
+
+FROM concessionaria.combustivel;
+
+
+
+CREATE VIEW concessionaria.fact_Locacao AS
+
+SELECT
+
+    idLocacao AS CodigoL,
+
+    idCombustivel AS CodigoCombustivel,
+
+    idCarro AS CodigoCarro,
+
+    idVendedor AS CodigoVendedor,
+
+    idCliente AS CodigoCliente,
+
+    vlrDiaria AS ValorDiaria,
+
+    qtdDiaria AS QuantidadeDiaria,
+
+    dataEntrega AS DataEntrega,
+
+    horaEntrega AS HoraEntrega,
+
+    horaLocacao AS HoraLocacao,
+
+    dataLocacao AS DataLocacao
+
+FROM concessionaria.locacao
+

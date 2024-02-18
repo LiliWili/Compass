@@ -1,0 +1,283 @@
+No modelo anterior todos os atributos estavam em uma só tabela, dificultando a consulta de dados. Após a normalização foi criado novas tabelas com dados separados, na tabela cliente coloquei todas as informações do mesmo e pode ser consultado pelo id na tabela locação, assim como nas outras tabelas deixando tudo mais organizado e de fácil compreensão.
+
+
+
+CREATE SCHEMA IF NOT EXISTS "concessionaria";
+
+
+
+CREATE TABLE concessionaria.Vendedor (
+
+    "idVendedor" INTEGER PRIMARY KEY,
+
+    "nomeVendedor" VARCHAR(255) NOT NULL,
+
+    "sexoVendedor" INT NOT NULL,
+
+    "estadoVendedor" VARCHAR(255) NOT NULL
+
+);
+
+
+
+CREATE TABLE concessionaria.Cliente (
+
+    "idCliente" INTEGER PRIMARY KEY,
+
+    "nomeCliente" VARCHAR(255) NOT NULL,
+
+    "cidadeCliente" VARCHAR(255) NOT NULL,
+
+    "estadoCliente" VARCHAR(255) NOT NULL,
+
+    "paisCliente" VARCHAR(255) NOT NULL
+
+);
+
+
+
+CREATE TABLE concessionaria.Combustivel (
+
+    "idCombustivel" INTEGER PRIMARY KEY,
+
+    "tipoCombustivel" VARCHAR(255) NOT NULL
+
+);
+
+
+
+CREATE TABLE concessionaria.Carro (
+
+    "idCarro" INTEGER PRIMARY KEY,
+
+    "idCombustivel" INT NOT NULL,
+
+    "modeloCarro" VARCHAR(255) NOT NULL,
+
+    "kmCarro" INT NOT NULL,
+
+    "chassiCarro" VARCHAR(255) NOT NULL,
+
+    "anoCarro" DATE NOT NULL,
+
+    "marcaCarro" VARCHAR(255) NOT NULL,
+
+    FOREIGN KEY ("idCombustivel") REFERENCES concessionaria.Combustivel("idCombustivel") -- Remove "concessionaria."
+
+);
+
+
+
+CREATE TABLE concessionaria.Locacao (
+
+    "idLocacao" INTEGER PRIMARY KEY,
+
+    "idCliente" INT NOT NULL,
+
+    "idVendedor" INT NOT NULL,
+
+    "IdCarro" INT NOT NULL,
+
+    "dataLocacao" DATE NOT NULL,
+
+    "horaLocacao" TIME NOT NULL,
+
+    "qtdDiaria" INT NOT NULL,
+
+    "vlrDiaria" INT NOT NULL,
+
+    "horaEntrega" TIME NOT NULL,
+
+    "dataEntrega" DATE NOT NULL,
+
+    FOREIGN KEY ("idCliente") REFERENCES concessionaria.Cliente("idCliente"),
+
+    FOREIGN KEY ("idVendedor") REFERENCES concessionaria.Vendedor("idVendedor"),
+
+    FOREIGN KEY ("IdCarro") REFERENCES concessionaria.Carro("idCarro")
+
+);
+
+
+
+INSERT INTO concessionaria.Cliente ("idCliente", "nomeCliente", "cidadeCliente", "estadoCliente", "paisCliente")
+
+VALUES
+
+(1, 'cliente um', 'São Paulo', 'São Paulo', 'Brasil'),
+
+(2, 'cliente dois', 'São Paulo', 'São Paulo', 'Brasil'),
+
+(3, 'cliente tres', 'Rio de Janeiro', 'Rio de Janeiro', 'Brasil'),
+
+(9, 'cliente nove', 'Rio de Janeiro', 'Rio de Janeiro', 'Brasil'),
+
+(8, 'cliente oito', 'Rio de Janeiro', 'Rio de Janeiro', 'Brasil'),
+
+(6, 'cliente seis', 'Belo Horizonte', 'Minas Gerais', 'Brasil'),
+
+(7, 'cliente sete', 'Belo Horizonte', 'Minas Gerais', 'Brasil'),
+
+(4, 'cliente quatro', 'Belo Horizonte', 'Minas Gerais', 'Brasil'),
+
+(5, 'cliente cinco', 'Rio de Janeiro', 'Rio de Janeiro', 'Brasil'),
+
+(10, 'cliente dez', 'Rio de Janeiro', 'Rio de Janeiro', 'Brasil'),
+
+(20, 'cliente vinte', 'Rio Branco', 'Amazonas', 'Brasil'),
+
+(21, 'cliente vinte e um', 'Macapá', 'Amazonas', 'Brasil'),
+
+(22, 'cliente vinte e dois', 'Macapá', 'Amazonas', 'Brasil'),
+
+(24, 'cliente vinte e quatro', 'Porto Alegre', 'Rio Grande do Sul', 'Brasil'),
+
+(23, 'cliente vinte e tres', 'Eusébio', 'Ceará', 'Brasil'),
+
+(27, 'cliente vinte e sete', 'Manaus', 'Amazonas', 'Brasil'),
+
+(25, 'cliente vinte e cinco', 'Campo Grande', 'Mato Grosso do Sul', 'Brasil'),
+
+(26, 'cliente vinte e seis', 'Campo Grande', 'Mato Grosso do Sul', 'Brasil');
+
+
+
+INSERT INTO concessionaria.Combustivel ("idCombustivel", "tipoCombustivel")
+
+VALUES
+
+(1, 'Gasolina'),
+
+(2, 'Etanol'),
+
+(3, 'Flex'),
+
+(4, 'Diesel');
+
+
+
+INSERT INTO concessionaria.Carro ("idCarro", "idCombustivel", "modeloCarro", "kmCarro", "chassiCarro", "anoCarro", "marcaCarro")
+
+VALUES
+
+(10, 1, 'Fiat Uno', 50000, 'ABC123', '2000-01-01', 'Fiat'),
+
+(11, 1, 'Fiat Uno', 30000, 'DEF456', '2005-01-01', 'Fiat'),
+
+(12, 2, 'Fiat Palio', 60000, 'GHI789', '2010-01-01', 'Fiat'),
+
+(13, 3, 'Fusca 78', 100000, 'JKL012', '1978-01-01', 'VW'),
+
+(14, 4, 'Fiat 147', 80000, 'MNO345', '1980-01-01', 'Fiat'),
+
+(15, 1, 'Versa', 40000, 'PQR678', '2015-01-01', 'Nissan'),
+
+(16, 2, 'Versa', 20000, 'STU901', '2018-01-01', 'Nissan'),
+
+(17, 3, 'Versa', 70000, 'VWX234', '2019-01-01', 'Nissan'),
+
+(18, 4, 'Versa', 90000, 'YZA567', '2020-01-01', 'Nissan'),
+
+(19, 1, 'Corolla XEI', 5000, 'BCD890', '2022-01-01', 'Toyota'),
+
+(20, 1, 'Corolla XEI', 30000, 'EFG123', '2020-01-01', 'Toyota'),
+
+(21, 2, 'Frontier', 10000, 'HIJ456', '2021-01-01', 'Nissan'),
+
+(22, 3, 'Frontier', 40000, 'KLM789', '2019-01-01', 'Nissan'),
+
+(23, 4, 'Frontier', 60000, 'NOP012', '2018-01-01', 'Nissan'),
+
+(24, 1, 'Frontier', 20000, 'QRS345', '2020-01-01', 'Nissan'),
+
+(25, 2, 'Frontier', 5000, 'TUV678', '2022-01-01', 'Nissan');
+
+
+
+INSERT INTO concessionaria.Vendedor ("idVendedor", "nomeVendedor", "sexoVendedor", "estadoVendedor")
+
+VALUES
+
+(5, 'vendedor cinco', 0, 'São Paulo'),
+
+(9, 'vendedor nove', 0, 'Rio de Janeiro'),
+
+(7, 'vendedor sete', 1, 'Rio de Janeiro'),
+
+(8, 'vendedor oito', 0, 'Minas Gerais'),
+
+(6, 'vendedor seis', 0, 'São Paulo'),
+
+(16, 'vendedor dezesseis', 1, 'Amazonas'),
+
+(30, 'vendedor trinta', 0, 'Rio Grande do Sul'),
+
+(22, 'vendedor vinte e dois', 1, 'Amazonas'),
+
+(23, 'vendedor vinte e tres', 0, 'Rio Grande do Sul'),
+
+(26, 'vendedor vinte e seis', 1, 'Rio de Janeiro'),
+
+(31, 'vendedor trinta e um', 1, 'Rio Grande do Sul'),
+
+(20, 'vendedor vinte', 1, 'Rio Grande do Sul'),
+
+(32, 'vendedor trinta e dois', 0, 'Mato Grosso do Sul');
+
+
+
+INSERT INTO concessionaria.Locacao ("idLocacao", "idCliente", "idVendedor", "IdCarro", "dataLocacao", "horaLocacao", "qtdDiaria", "vlrDiaria", "horaEntrega", "dataEntrega")
+
+VALUES
+
+(5, 1, 32, 10, '2023-02-01', '10:00:00', 5, 200, '18:00:00', '2023-02-06'),
+
+(4, 2, 6, 10, '2023-02-02', '11:00:00', 10, 300, '20:00:00', '2023-02-07'),
+
+(6, 3, 9, 11, '2023-02-03', '12:00:00', 8, 250, '17:00:00', '2023-02-08'),
+
+(7, 9, 8, 12, '2023-02-04', '13:00:00', 12, 350, '19:00:00', '2023-02-09'),
+
+(8, 8, 8, 14, '2023-02-05', '14:00:00', 15, 400, '16:00:00', '2023-02-10'),
+
+(9, 3, 6, 15, '2023-02-06', '15:00:00', 7, 220, '21:00:00', '2023-02-11'),
+
+(10, 7, 6, 13, '2023-02-07', '16:00:00', 6, 180, '15:00:00', '2023-02-12'),
+
+(34, 8, 8, 13, '2023-02-08', '17:00:00', 9, 270, '22:00:00', '2023-02-13'),
+
+(12, 4, 8, 17, '2023-02-09', '18:00:00', 11, 320, '14:00:00', '2023-02-14'),
+
+(3, 10, 32, 16, '2023-02-10', '19:00:00', 14, 380, '23:00:00', '2023-02-15'),
+
+(11, 20, 20, 16, '2023-02-11', '20:00:00', 20, 500, '12:00:00', '2023-02-16'),
+
+(16, 5, 20, 16, '2023-02-12', '21:00:00', 16, 420, '18:00:00', '2023-02-17'),
+
+(19, 21, 22, 25, '2023-02-13', '22:00:00', 18, 450, '10:00:00', '2023-02-18'),
+
+(23, 22, 22, 24, '2023-02-14', '23:00:00', 5, 150, '20:00:00', '2023-02-19'),
+
+(27, 23, 22, 24, '2023-02-15', '00:00:00', 11, 320, '17:00:00', '2023-02-20'),
+
+(33, 27, 22, 22, '2023-02-16', '01:00:00', 10, 300, '09:00:00', '2023-02-21'),
+
+(32, 27, 23, 21, '2023-02-17', '02:00:00', 4, 120, '16:00:00', '2023-02-22'),
+
+(31, 26, 23, 11, '2023-02-18', '03:00:00', 7, 210, '08:00:00', '2023-02-23'),
+
+(37, 5, 23, 19, '2023-02-19', '04:00:00', 16, 430, '19:00:00', '2023-02-24'),
+
+(41, 20, 5, 16, '2023-02-20', '05:00:00', 13, 370, '15:00:00', '2023-02-25'),
+
+(42, 21, 5, 16, '2023-02-21', '06:00:00', 19, 490, '21:00:00', '2023-02-26'),
+
+(44, 22, 26, 25, '2023-02-22', '07:00:00', 3, 100, '12:00:00', '2023-02-27'),
+
+(43, 23, 26, 23, '2023-02-23', '08:00:00', 17, 440, '18:00:00', '2023-02-28'),
+
+(45, 26, 26, 24, '2023-02-24', '09:00:00', 6, 190, '23:00:00', '2023-03-01'),
+
+(46, 25, 26, 18, '2023-02-25', '10:00:00', 8, 240, '14:00:00', '2023-03-02'),
+
+(47, 26, 26, 16, '2023-02-26', '11:00:00', 10, 300, '16:00:00', '2023-03-03');

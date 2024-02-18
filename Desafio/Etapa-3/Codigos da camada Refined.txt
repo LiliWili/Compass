@@ -1,0 +1,182 @@
+Codigo do CSV
+
+
+import sys
+import boto3
+import random
+from awsglue.utils import getResolvedOptions
+from awsglue.transforms import *
+from awsglue.dynamicframe import DynamicFrame
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import col, when
+from pyspark.sql.types import IntegerType
+
+def generate_numeric_artist_id(used_artist_ids):
+    new_id = random.randint(10000, 99999)
+    while new_id in used_artist_ids:
+        new_id = random.randint(10000, 99999)
+    used_artist_ids.add(new_id)
+    return new_id
+
+args = getResolvedOptions(sys.argv, ['JOB_NAME', 'S3_INPUT_PATH', 'S3_TARGET_PATH'])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+s3 = boto3.client('s3')
+source_bucket = args['S3_INPUT_PATH'].split('/')[2]
+source_prefix = '/'.join(args['S3_INPUT_PATH'].split('/')[3:])
+target_path = args['S3_TARGET_PATH']
+response = s3.list_objects_v2(Bucket=source_bucket, Prefix=source_prefix)
+
+files = [obj['Key'] for obj in response['Contents']]
+
+used_artist_ids = set()
+used_cast_ids = set()
+
+for file in files:
+
+    source_file = f"s3://{source_bucket}/{file}"
+    df = spark.read.parquet(source_file)
+    df = df.withColumnRenamed('tituloPincipal', 'tituloPrincipal')
+    df = df.withColumn('generoArtista', 
+                       when(col('generoArtista') == 'actor', 'M')
+                       .when(col('generoArtista') == 'actress', 'F')
+                       .otherwise(col('generoArtista')))
+
+    
+    id_artist_udf = spark.udf.register("generate_numeric_artist_id", lambda: generate_numeric_artist_id(used_artist_ids), IntegerType())
+    df = df.withColumn("idArtista", id_artist_udf())
+    
+    df_artista = df.select('idArtista', 'nomeArtista', 'generoArtista', 'profissao').distinct()
+    dim_artista_dynamic_frame = DynamicFrame.fromDF(df_artista, glueContext, "dim_artista_dynamic_frame")
+    output_path_artista = target_path + "/dim_artistaCSV"
+    glueContext.write_dynamic_frame.from_options(
+        frame=dim_artista_dynamic_frame,
+        connection_type="s3",
+        connection_options={"path": output_path_artista},
+        format="parquet"
+    )
+
+    df_filme = df.select('id', 'tituloPrincipal', 'genero', 'tituloOriginal').distinct()
+    dim_filme_dynamic_frame = DynamicFrame.fromDF(df_filme, glueContext, "dim_filme_dynamic_frame")
+    output_path_filme = target_path + "/dim_filmeCSV"
+    glueContext.write_dynamic_frame.from_options(
+        frame=dim_filme_dynamic_frame,
+        connection_type="s3",
+        connection_options={"path": output_path_filme},
+        format="parquet"
+    )
+
+    df_fato_elenco = df.select('id', 'idArtista', 'idElenco', 'personagem').distinct()
+    fato_elenco_dynamic_frame = DynamicFrame.fromDF(df_fato_elenco, glueContext, "fato_elenco_dynamic_frame")
+    output_path_fato = target_path + "/fato_elencoCSV"
+    glueContext.write_dynamic_frame.from_options(
+        frame=fato_elenco_dynamic_frame,
+        connection_type="s3",
+        connection_options={"path": output_path_fato},
+        format="parquet"
+    )
+
+job.commit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+Codigo da API
+
+
+
+import sys
+import boto3
+from awsglue.utils import getResolvedOptions
+from awsglue.transforms import *
+from awsglue.dynamicframe import DynamicFrame
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import col, when, udf
+from pyspark.sql.types import IntegerType
+from pyspark.sql.functions import col
+import random
+
+args = getResolvedOptions(sys.argv, ['JOB_NAME', 'S3_INPUT_PATH', 'S3_TARGET_PATH'])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+s3 = boto3.client('s3')
+source_bucket = args['S3_INPUT_PATH'].split('/')[2]
+source_prefix = '/'.join(args['S3_INPUT_PATH'].split('/')[3:])
+target_path = args['S3_TARGET_PATH']
+response = s3.list_objects_v2(Bucket=source_bucket, Prefix=source_prefix)
+files = [obj['Key'] for obj in response['Contents']]
+for file in files:
+
+    source_file = f"s3://{source_bucket}/{file}"
+
+    
+    df = spark.read.parquet(source_file)
+    df = df.withColumnRenamed('name', 'nome') \
+           .withColumnRenamed('film_id', 'idFilme') \
+           .withColumnRenamed('id', 'idPessoa') \
+           .withColumnRenamed('gender', 'generoArtista') \
+           .withColumnRenamed('known_for_department', 'profissao') \
+           .withColumnRenamed('original_name', 'nomeOriginal') \
+           .withColumnRenamed('popularity', 'popularidade') \
+           .withColumnRenamed('cast_id', 'idElenco') \
+           .withColumnRenamed('character', 'personagem')
+
+    df = df.withColumn('generoArtista', 
+                       when(col('generoArtista') == 2, 'M')
+                       .when(col('generoArtista') == 1, 'F')
+                       .otherwise(None))
+
+    df = df.dropna(subset=["generoArtista"])
+
+    generate_random_id_udf = udf(lambda: random.randint(10000, 99999), IntegerType())
+    df = df.withColumn("idFato", generate_random_id_udf())
+
+    
+    df_fato_cast = df.select('idFato', 'idFilme', 'idPessoa', 'idElenco', 'personagem')
+    fato_cast_dynamic_frame = DynamicFrame.fromDF(df_fato_cast, glueContext, "fato_cast_dynamic_frame")
+    glueContext.write_dynamic_frame.from_options(
+        frame=fato_cast_dynamic_frame,
+        connection_type="s3",
+        connection_options={"path": f"{target_path}/fato_castAPI"},
+        format="parquet"
+    )
+
+    df_dim_filme = df.select('idFilme').distinct()
+    dim_filme_dynamic_frame = DynamicFrame.fromDF(df_dim_filme, glueContext, "dim_filme_dynamic_frame")
+    glueContext.write_dynamic_frame.from_options(
+        frame=dim_filme_dynamic_frame,
+        connection_type="s3",
+        connection_options={"path": f"{target_path}/dim_filmeAPI"},
+        format="parquet"
+    )
+
+    df_dim_pessoa = df.select('idPessoa', 'generoArtista', 'profissao', 'nome', 'nomeOriginal', 'popularidade').distinct()
+    dim_pessoa_dynamic_frame = DynamicFrame.fromDF(df_dim_pessoa, glueContext, "dim_pessoa_dynamic_frame")
+    glueContext.write_dynamic_frame.from_options(
+        frame=dim_pessoa_dynamic_frame,
+        connection_type="s3",
+        connection_options={"path": f"{target_path}/dim_pessoaAPI"},
+        format="parquet"
+    )
+
+job.commit()
+
